@@ -18,7 +18,7 @@ require("dotenv").config({ path: './.env' });
 require('./passport');
 
 const { RPCObserver } = require("./rpc/rpc");
-RPCObserver(RPC_QUEUE_NAME);
+RPCObserver(process.env.RPC_QUEUE_NAME);
 
 const app = express();
 
@@ -56,7 +56,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 
 // TODO: consider change root route name
-// app.use('/users', userRouter);
+app.use('/users', userRouter);
 
 // bad request
 app.all('*', (req, res, next) => {

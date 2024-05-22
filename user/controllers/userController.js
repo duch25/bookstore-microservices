@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
 
+const { RPCRequest } = require("../rpc/rpc");
+
 const { createSendToken } = require("../utils/tokensAndCookies");
 const { sendEmail } = require("../utils/email");
 const catchAsync = require("../utils/catchAsync");
@@ -26,13 +28,19 @@ module.exports = {
     const user = await User.findById(decoded.id);
     if (!user) return next(new AppError("No user found with that ID", 404));
 
-    // TODO
-    // communicate with Account Service to get account balance
+    // TODO: communicate with Payment Service to get account balance
+    const requestPayload = {
+      method: "GET",
+      username: user.username,
+    }
+
+    const data = await RPCRequest("PAYMENT_RPC", requestPayload)
 
     res.status(200).json({
       status: "success",
       data: {
-        user
+        user,
+        accountBalance: data.accountBalance
       }
     })
   }),
@@ -64,13 +72,14 @@ module.exports = {
     const existUser = await User.findOne({ username });
     if (!existUser) {
       const newUser = await User.create(req.body);
-      const data = {
+      const requestPayload = {
+        method: "POST",
         user: newUser._id,
-        bookList: []
       }
 
       //TODO: communicate with Purchase Service
-      await Cart.create(data);
+      await RPCRequest("PURCHASE_RPC", requestPayload)
+
       createSendToken(newUser, 201, res);
     } else {
       console.log("Existed!!!");
