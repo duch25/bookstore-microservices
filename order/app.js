@@ -15,6 +15,9 @@ const orderRouter = require('./routes/orderRoutes');
 
 require("dotenv").config({ path: './.env' });
 
+const { RPCObserver } = require('./rpc/rpc');
+RPCObserver(process.env.RPC_QUEUE_NAME)
+
 const app = express();
 
 app.use(cookieParser());
