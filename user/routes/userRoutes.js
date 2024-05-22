@@ -1,5 +1,6 @@
 const express = require('express')
 const multer = require("multer")
+const passport = require('passport')
 
 const userController = require('../controllers/userController')
 const userAuth = require("../middlewares/auth");
