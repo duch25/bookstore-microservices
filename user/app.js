@@ -15,6 +15,7 @@ const globalErrorHandler = require('./controllers/errorController');
 
 const userRouter = require('./routes/userRoutes')
 require("dotenv").config({ path: './.env' });
+require('./passport');
 
 const { RPCObserver } = require("./rpc");
 RPCObserver(RPC_QUEUE_NAME);
