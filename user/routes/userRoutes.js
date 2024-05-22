@@ -38,7 +38,7 @@ router.get(
         failureRedirect: '/',
         failureFlash: "Invalid Google credentials.",
     }),
-    authController.loginWithGoogle
+    userController.loginWithGoogle
 );
 
 router.use(userAuth.protect)
