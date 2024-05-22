@@ -16,6 +16,9 @@ const globalErrorHandler = require('./controllers/errorController');
 const userRouter = require('./routes/userRoutes')
 require("dotenv").config({ path: './.env' });
 
+const { RPCObserver } = require("./rpc");
+RPCObserver(RPC_QUEUE_NAME);
+
 const app = express();
 
 app.use(cookieParser());
