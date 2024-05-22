@@ -32,6 +32,12 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             required: [true, 'A order must have total cost']
         },
+
+        checkoutStatus: {
+            type: String,
+            enum: ["paid", "unpaid", "cancelled"],
+            default: "unpaid"
+        }
     },
     {
         toJSON: { virtuals: true },
