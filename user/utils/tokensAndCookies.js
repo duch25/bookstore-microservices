@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
 
-module.exports = {
-    signToken: (id) => {
-        return jwt.sign({ id }, process.env.JWT_SECRET, {
-            expiresIn: process.env.JWT_EXPIRES_IN,
-        });
-    },
+const signToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+}
 
+module.exports = {
     createSendToken: async (user, statusCode, res, redirectUrl = '') => {
         const token = signToken(user._id);
         user.validTokens.push(token);
