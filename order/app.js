@@ -52,7 +52,7 @@ app.use(hpp({
 app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 
-app.use('/orders', orderRouter);
+app.use('/', orderRouter);
 
 // bad request
 app.all('*', (req, res, next) => {

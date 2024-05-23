@@ -53,7 +53,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(compression());
 
-app.use('/cart', cartRouter);
+app.use('/', cartRouter);
 
 // bad request
 app.all('*', (req, res, next) => {

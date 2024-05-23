@@ -55,8 +55,7 @@ app.use(passport.initialize());
 app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 
-// TODO: consider change root route name
-app.use('/users', userRouter);
+app.use('/', userRouter);
 
 // bad request
 app.all('*', (req, res, next) => {
