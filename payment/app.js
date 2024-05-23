@@ -2,7 +2,6 @@ const express = require("express");
 const mongoSanitize = require('express-mongo-sanitize');
 const cors = require("cors")
 
-const paymentRouter = require("./routes/paymentRoutes")
 const rechargeRouter = require("./routes/rechargeRoutes")
 const accountRouter = require("./routes/accountRoutes")
 
@@ -29,7 +28,6 @@ app.get('/', (req, res) => {
     res.send("Hello")
 })
 
-app.use("/payment", paymentRouter)
 app.use("/recharge", rechargeRouter)
 app.use("/account", accountRouter)
 
