@@ -1,0 +1,80 @@
+version: "3"
+services:
+  product:
+    build:
+      dockerfile: Dockerfile
+      context: ./product
+    container_name: product
+    ports:
+      - "3002:3002"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/product/node_modules
+
+    env_file:
+      - ./product/.env
+  user:
+    build:
+      dockerfile: Dockerfile
+      context: ./user
+    container_name: user
+    ports:
+      - "3001:3001"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/user/node_modules
+    env_file:
+      - ./user/.env
+  purchase:
+    build:
+      dockerfile: Dockerfile
+      context: ./purchase
+    container_name: purchase
+    ports:
+      - "3003:3003"
+    restart: always
+    volumes:
+      - .:/app/
+      - /app/purchase/node_modules
+    env_file:
+      - ./purchase/.env
+  order:
+    build:
+      dockerfile: Dockerfile
+      context: ./order
+    container_name: order
+    ports:
+      - "3004:3004"
+    restart: always
+    volumes:
+      - .:/app/
+      - /app/order/node_modules
+    env_file:
+      - ./order/.env
+  payment:
+    build:
+      dockerfile: Dockerfile
+      context: ./payment
+    container_name: payment
+    ports:
+      - "3005:3005"
+    restart: always
+    volumes:
+      - .:/app/
+      - /app/payment/node_modules
+    env_file:
+      - ./payment/.env
+  nginx-proxy:
+    build:
+      dockerfile: Dockerfile
+      context: ./proxy
+    depends_on:
+      - product
+      - user
+      - purchase
+      - order
+      - payment
+    ports:
+      - 80:80
