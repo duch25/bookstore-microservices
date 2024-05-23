@@ -17,7 +17,7 @@ const databaseOperation = async (requestPayload) => {
     let res = null;
 
     if (method === 'GET') {
-        res = await User.findOne({ username: requestPayload.username });
+        res = await Order.findById(requestPayload.user);
     }
 
     return res;

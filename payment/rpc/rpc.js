@@ -13,13 +13,127 @@ const getChannel = async () => {
     return await amqplibConnection.createChannel();
 }
 
+function checkTransaction(account, totalCost, today) {
+    today = today.getTime();
+
+    const transactionHistory = account.transactionHistory;
+    const limit = 200000;
+    let totalMoney = 0;
+
+    for (const tran of transactionHistory) {
+        if (tran.status == 'completed') {
+            const date = new Date(tran.date).getTime();
+
+            if (today == date && tran.amount < 0) {
+                totalMoney += -1 * tran.amount;
+            }
+        }
+    }
+
+    return totalMoney + totalCost <= limit;
+}
+
+function checkNewCustomer(account) {
+    const transactionHistory = account.transactionHistory;
+
+    for (const tran of transactionHistory) {
+        if (tran.status == 'completed') {
+            if (tran.amount < 0) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 const databaseOperation = async (requestPayload) => {
     const method = requestPayload.method;
 
     let res = null;
 
     if (method === 'GET') {
-        res = await TransactionAccount.findOne({ username: requestPayload.username });
+        res = await TransactionAccount.findById(requestPayload.userIdId);
+    }
+    else if (method === "checkout") {
+        const user = requestPayload.user;
+        let totalCost = requestPayload.totalCost;
+
+        // TODO: communicate with User Service to verify user
+        const freshUser = await RPCRequest("USER_RPC", { method: "GET", userId: user });
+
+        const currentDate = new Date();
+        const day = currentDate.getDate();
+        const month = currentDate.getMonth() + 1;
+        const year = currentDate.getFullYear();
+        const date = new Date(`${year}-${month}-${day}`);
+
+        if (freshUser) {
+            const username = freshUser.username;
+            const account = await TransactionAccount.findOne({ username: username });
+
+            // discount for new customer
+            const isNewCustomer = checkNewCustomer(account);
+
+            if (isNewCustomer) {
+                totalCost = totalCost - (totalCost * 5 / 100);
+            }
+
+            const isValid = checkTransaction(account, totalCost, date);
+
+            if (account.accountBalance >= totalCost && isValid) {
+                account.accountBalance -= totalCost;
+
+                account.transactionHistory.push({
+                    date: date,
+                    amount: -totalCost,
+                    status: "completed"
+                })
+
+                await TransactionAccount.findOneAndUpdate({ username: username }, account, {
+                    new: true,
+                    runValidators: true
+                })
+
+                const admin = await TransactionAccount.findOne({ username: "admin" });
+                admin.accountBalance += totalCost;
+                admin.transactionHistory.push({
+                    date: date,
+                    amount: totalCost,
+                    status: "completed"
+                })
+
+                await TransactionAccount.findOneAndUpdate({ username: "admin" }, admin, {
+                    new: true,
+                    runValidators: true
+                })
+
+                res = { status: "success" }
+
+            } else {
+                account.transactionHistory.push({
+                    date: date,
+                    amount: -totalCost,
+                    status: "failed"
+                })
+
+                await TransactionAccount.findOneAndUpdate({ username: username }, account, {
+                    new: true,
+                    runValidators: true
+                })
+
+                let message = "";
+                if (account.accountBalance < totalCost) {
+                    message = "Not Available Balance";
+                } else {
+                    message = "Over Transaction Limit"
+                }
+
+                res = { status: "fail", message: message }
+            }
+        } else {
+            res = { status: "fail" }
+        }
     }
 
     return res;

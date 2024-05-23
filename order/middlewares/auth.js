@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const { RPCRequest } = require("../rpc/rpc");
 
 module.exports = {
     protect: catchAsync(async (req, res, next) => {
@@ -16,7 +17,7 @@ module.exports = {
         const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
         // TODO: communicate with User Service
-        const freshUser = await User.findById(decoded.id);
+        const freshUser = await RPCRequest("USER_RPC", { method: "GET", userId: decoded.id });
 
         if (!freshUser)
             return next(
@@ -26,14 +27,14 @@ module.exports = {
                 )
             );
 
-        if (freshUser.changedPasswordAfter(decoded.iat)) {
-            return next(
-                new AppError(
-                    "User recently changed password! Please log in again.",
-                    401
-                )
-            );
-        }
+        // if (freshUser.changedPasswordAfter(decoded.iat)) {
+        //     return next(
+        //         new AppError(
+        //             "User recently changed password! Please log in again.",
+        //             401
+        //         )
+        //     );
+        // }
 
         if (!freshUser.validTokens.includes(token)) {
             return next(

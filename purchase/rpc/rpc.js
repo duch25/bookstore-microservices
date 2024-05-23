@@ -24,6 +24,12 @@ const databaseOperation = async (requestPayload) => {
     else if (method === 'POST') {
         res = await Cart.create({ user: requestPayload.user, bookList: [] });
     }
+    else if (method === "PATCH") {
+        res = await Cart.findOneAndUpdate({ user: requestPayload.user }, { bookList: requestPayload.data }, {
+            new: true,
+            runValidators: true,
+        })
+    }
 
     return res;
 }

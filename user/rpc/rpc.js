@@ -1,6 +1,8 @@
 const amqplib = require('amqplib');
 const { v4: uuid4 } = require('uuid');
 
+const User = require('../models/userModel');
+
 let amqplibConnection = null;
 
 const getChannel = async () => {
@@ -17,7 +19,7 @@ const databaseOperation = async (requestPayload) => {
     let res = null;
 
     if (method === 'GET') {
-        res = await User.findOne({ username: requestPayload.username });
+        res = await User.findById(requestPayload.userId);
     }
 
     return res;

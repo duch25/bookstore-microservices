@@ -21,6 +21,12 @@ const databaseOperation = async (requestPayload) => {
     if (method === 'GET') {
         res = await Book.findOne({ isbn: requestPayload.isbn });
     }
+    else if (method === "PATCH") {
+        res = await Book.findOneAndUpdate({ isbn: requestPayload.isbn }, requestPayload.data, {
+            new: true,
+            runValidators: true
+        })
+    }
 
     return res;
 }
