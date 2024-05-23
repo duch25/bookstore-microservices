@@ -1,5 +1,7 @@
 const Cart = require('../models/cartModel');
 
+const { RPCRequest } = require('../rpc/rpc');
+
 async function getCart(req) {
     const user = req.user;
     const userID = user._id;
@@ -72,13 +74,12 @@ module.exports = {
             const bookList = cart.bookList;
 
             // TODO: communicate with Product Service
-            let book = await Book.findOne({ isbn: isbn });
+            let book = await RPCRequest("PRODUCT_RPC", { method: "GET", isbn: isbn });
 
-            const bookID = String(book._id);
             let curBook = null;
-            for (const book of bookList) {
-                if (String(book.book) == bookID) {
-                    curBook = book;
+            for (const b of bookList) {
+                if (b.book == book.isbn) {
+                    curBook = b;
                 }
             }
             if (curBook) {
@@ -86,11 +87,12 @@ module.exports = {
             }
             if (method === 'increase') {
                 if (curBook == null) {
-                    cart.bookList.push({ book: book._id, quantity: quantity });
-                    const lastestCart = await Cart.findByIdAndUpdate(cart._id, { bookList: bookList }, {
+                    cart.bookList.push({ book: isbn, quantity: quantity });
+                    await Cart.findByIdAndUpdate(cart._id, { bookList: bookList }, {
                         new: true,
                         runValidators: true
                     });
+
                     res.status(200).json({
                         status: 'success',
                         data: {
@@ -105,10 +107,11 @@ module.exports = {
 
                     if (curBook.quantity + quantity <= maxQuantity) {
                         curBook.quantity += quantity
-                        const lastestCart = await Cart.findByIdAndUpdate(cart._id, { bookList: bookList }, {
+                        await Cart.findByIdAndUpdate(cart._id, { bookList: bookList }, {
                             new: true,
                             runValidators: true
                         });
+
                         res.status(200).json({
                             status: 'success',
                             data: {
