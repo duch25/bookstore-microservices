@@ -52,8 +52,8 @@ const databaseOperation = async (requestPayload) => {
 
     let res = null;
 
-    if (method === 'GET') {
-        res = await TransactionAccount.findById(requestPayload.userIdId);
+    if (method === 'inquire') {
+        res = await TransactionAccount.findOne({ username: requestPayload.username });
     }
     else if (method === "checkout") {
         const user = requestPayload.user;

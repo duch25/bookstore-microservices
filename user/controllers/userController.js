@@ -30,7 +30,7 @@ module.exports = {
 
     // TODO: communicate with Payment Service to get account balance
     const requestPayload = {
-      method: "GET",
+      method: "inquire",
       username: user.username,
     }
 
@@ -39,8 +39,7 @@ module.exports = {
     res.status(200).json({
       status: "success",
       data: {
-        user,
-        accountBalance: data.accountBalance
+        user: { ...user._doc, accountBalance: data.accountBalance }
       }
     })
   }),
